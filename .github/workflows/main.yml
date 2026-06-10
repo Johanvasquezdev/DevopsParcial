@@ -28,6 +28,11 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Prepare dist for Surge
+        run: |
+          echo "johancicd.surge.sh" > ./dist/CNAME
+          cp ./dist/index.html ./dist/200.html
+
       - name: Install Surge CLI
         run: npm install -g surge
 
