@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --primary: 252 87% 73%;
+    --primary-foreground: 224 71% 4%;
+    --secondary: 215 25% 17%;
+    --secondary-foreground: 213 31% 91%;
+    --muted: 215 25% 12%;
+    --muted-foreground: 217 10% 65%;
+    --accent: 174 80% 55%;
+    --accent-foreground: 224 71% 4%;
+    --card: 222 47% 7%;
+    --card-foreground: 213 31% 91%;
+    --border: 215 25% 18%;
+    --ring: 252 87% 73%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* GPU-accelerated elements */
+.will-animate {
+  will-change: transform, opacity;
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    hsl(252, 87%, 80%) 0%,
+    hsl(174, 80%, 65%) 50%,
+    hsl(330, 80%, 75%) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effect */
+.glow {
+  box-shadow: 0 0 40px hsla(252, 87%, 73%, 0.25),
+              0 0 80px hsla(252, 87%, 73%, 0.1);
+}
+
+/* Animated gradient border */
+@keyframes border-rotate {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-border {
+  background: linear-gradient(
+    270deg,
+    hsl(252, 87%, 73%),
+    hsl(174, 80%, 55%),
+    hsl(330, 80%, 70%),
+    hsl(252, 87%, 73%)
+  );
+  background-size: 400% 400%;
+  animation: border-rotate 4s ease infinite;
+}
