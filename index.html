@@ -1,14 +1,281 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Electiva 2 – CI/CD con GitHub Actions y Surge.sh</title>
-    <meta name="description" content="Primer parcial Electiva 2 – Aprendiendo CI/CD con GitHub Actions y Surge.sh" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electiva 2 – CI/CD con GitHub Actions y Surge.sh</title>
+  <meta name="description" content="Primer parcial Electiva 2 – Aprendiendo CI/CD con GitHub Actions y Surge.sh" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Anime.js v3 CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <!-- React 18 + ReactDOM + Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-[#0d1117] text-[#e6edf3] font-sans">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useEffect } = React;
+
+    /* ── Data ── */
+    const pipeline = [
+      { label: 'git commit',     cmd: 'commit',  color: '#8b949e' },
+      { label: 'git push',       cmd: 'push',    color: '#58a6ff' },
+      { label: 'GitHub Actions', cmd: 'ci',      color: '#a371f7' },
+      { label: 'npm run build',  cmd: 'build',   color: '#f0883e' },
+      { label: 'surge deploy',   cmd: 'deploy',  color: '#3fb950' },
+      { label: 'Live',           cmd: 'live',    color: '#3fb950' },
+    ];
+
+    const stack = [
+      { name: 'React 18',         detail: 'UI · CDN',             dot: '#58a6ff' },
+      { name: 'Tailwind CSS',     detail: 'Estilos · CDN',        dot: '#38bdf8' },
+      { name: 'Anime.js',         detail: 'Animaciones · CDN',    dot: '#a371f7' },
+      { name: 'GitHub Actions',   detail: 'CI Pipeline',          dot: '#3fb950' },
+      { name: 'Surge.sh',         detail: 'CD · Hosting estático',dot: '#f0883e' },
+    ];
+
+    const terminalLines = [
+      { type: 'cmd',  text: '$ git add .'                                    },
+      { type: 'cmd',  text: '$ git commit -m "update: new content"'          },
+      { type: 'cmd',  text: '$ git push origin main'                         },
+      { type: 'out',  text: ''                                                },
+      { type: 'info', text: '↳  GitHub Actions triggered'                   },
+      { type: 'ok',   text: '   ✓  Checkout code'                            },
+      { type: 'ok',   text: '   ✓  Install Surge CLI'                        },
+      { type: 'ok',   text: '   ✓  Deploy to johancicd.surge.sh'            },
+      { type: 'out',  text: ''                                                },
+      { type: 'live', text: '   → Published in ~30s 🚀'                      },
+    ];
+
+    /* ── Check icon ── */
+    function Check() {
+      return (
+        <svg className="inline-block" width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" fill="#3fb950" opacity="0.15"/>
+          <path d="M4.5 8l2.5 2.5 4.5-5" stroke="#3fb950" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      );
+    }
+
+    /* ── Arrow icon ── */
+    function Arrow() {
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#30363d] shrink-0">
+          <path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      );
+    }
+
+    /* ── Main App ── */
+    function App() {
+      useEffect(() => {
+        /* Timeline: hero → pipeline → cards → terminal */
+        const tl = anime.timeline({ easing: 'easeOutExpo' });
+
+        tl.add({
+          targets: '.hero-line',
+          translateY: [24, 0],
+          opacity: [0, 1],
+          delay: anime.stagger(100),
+          duration: 650,
+        })
+        .add({
+          targets: '.pipe-step',
+          scale: [0.85, 1],
+          opacity: [0, 1],
+          delay: anime.stagger(70),
+          duration: 400,
+          easing: 'spring(1, 90, 12, 0)',
+        }, '-=350')
+        .add({
+          targets: '.stack-item',
+          translateX: [-16, 0],
+          opacity: [0, 1],
+          delay: anime.stagger(60),
+          duration: 350,
+        }, '-=200')
+        .add({
+          targets: '.terminal-block',
+          opacity: [0, 1],
+          translateY: [12, 0],
+          duration: 400,
+        }, '-=150');
+
+        /* Pulse live dot */
+        anime({
+          targets: '.live-pulse',
+          scale: [1, 1.6],
+          opacity: [0.8, 0],
+          duration: 1400,
+          loop: true,
+          easing: 'easeOutSine',
+        });
+      }, []);
+
+      return (
+        <div className="min-h-screen px-4 py-12 max-w-3xl mx-auto">
+
+          {/* ── Status bar ── */}
+          <div className="flex items-center justify-between mb-12 opacity-0 hero-line">
+            <span className="font-mono text-xs text-[#8b949e]">johancicd.surge.sh</span>
+            <span className="flex items-center gap-2 text-xs text-[#3fb950] font-mono">
+              <span className="relative flex size-2">
+                <span className="live-pulse absolute inline-flex size-full rounded-full bg-[#3fb950]"></span>
+                <span className="relative inline-flex size-2 rounded-full bg-[#3fb950]"></span>
+              </span>
+              live
+            </span>
+          </div>
+
+          {/* ── Hero ── */}
+          <header className="mb-14">
+            <p className="hero-line opacity-0 font-mono text-xs text-[#8b949e] mb-3 tracking-widest uppercase">
+              Electiva 2 · Primer parcial
+            </p>
+            <h1 className="hero-line opacity-0 text-5xl sm:text-6xl font-bold text-[#e6edf3] leading-tight mb-4">
+              ¡Hola, Mundo!
+            </h1>
+            <p className="hero-line opacity-0 text-[#8b949e] text-lg leading-relaxed max-w-xl">
+              Estoy aprendiendo <span className="text-[#58a6ff] font-medium">CI/CD</span> con{' '}
+              <span className="text-[#a371f7] font-medium">GitHub Actions</span> y{' '}
+              <span className="text-[#f0883e] font-medium">Surge.sh</span> — cada{' '}
+              <code className="font-mono text-sm bg-[#161b22] px-1.5 py-0.5 rounded text-[#e6edf3] border border-[#30363d]">git push</code>{' '}
+              despliega automáticamente.
+            </p>
+          </header>
+
+          {/* ── Pipeline ── */}
+          <section className="mb-14">
+            <h2 className="text-xs font-mono uppercase tracking-widest text-[#8b949e] mb-5">
+              Pipeline CI/CD
+            </h2>
+            <div className="flex items-center flex-wrap gap-1">
+              {pipeline.map((step, i) => (
+                <div key={step.cmd} className="flex items-center gap-1">
+                  <div className="pipe-step opacity-0 flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-lg border border-[#30363d] bg-[#161b22] min-w-[72px]">
+                    <Check />
+                    <span className="font-mono text-[10px] text-[#8b949e] text-center leading-tight">
+                      {step.label}
+                    </span>
+                  </div>
+                  {i < pipeline.length - 1 && <Arrow />}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ── Stack ── */}
+          <section className="mb-14">
+            <h2 className="text-xs font-mono uppercase tracking-widest text-[#8b949e] mb-5">
+              Stack
+            </h2>
+            <div className="flex flex-col gap-2">
+              {stack.map((item) => (
+                <div
+                  key={item.name}
+                  className="stack-item opacity-0 flex items-center justify-between px-4 py-3 rounded-lg border border-[#30363d] bg-[#161b22]"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="size-2 rounded-full shrink-0"
+                      style={{ backgroundColor: item.dot }}
+                    ></span>
+                    <span className="font-medium text-sm text-[#e6edf3]">{item.name}</span>
+                  </div>
+                  <span className="font-mono text-xs text-[#8b949e]">{item.detail}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* ── Terminal ── */}
+          <section className="mb-14">
+            <h2 className="text-xs font-mono uppercase tracking-widest text-[#8b949e] mb-5">
+              Flujo de despliegue
+            </h2>
+            <div className="terminal-block opacity-0 rounded-xl border border-[#30363d] bg-[#161b22] overflow-hidden">
+              {/* Terminal header */}
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-[#30363d] bg-[#0d1117]">
+                <span className="size-3 rounded-full bg-[#ff5f57]"></span>
+                <span className="size-3 rounded-full bg-[#febc2e]"></span>
+                <span className="size-3 rounded-full bg-[#28c840]"></span>
+                <span className="ml-3 font-mono text-xs text-[#8b949e]">bash</span>
+              </div>
+              {/* Lines */}
+              <div className="px-5 py-4 space-y-1">
+                {terminalLines.map((line, i) => (
+                  <div key={i} className="font-mono text-sm leading-relaxed">
+                    {line.type === 'cmd'  && <span className="text-[#e6edf3]">{line.text}</span>}
+                    {line.type === 'out'  && <span className="text-[#30363d]">─</span>}
+                    {line.type === 'info' && <span className="text-[#58a6ff]">{line.text}</span>}
+                    {line.type === 'ok'   && <span className="text-[#3fb950]">{line.text}</span>}
+                    {line.type === 'live' && (
+                      <span className="text-[#f0883e] font-medium">{line.text}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ── Footer ── */}
+          <footer className="border-t border-[#21262d] pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <p className="font-mono text-xs text-[#8b949e]">
+              Johanvasquezdev · Electiva 2 · 2026
+            </p>
+            <div className="flex items-center gap-4 font-mono text-xs text-[#8b949e]">
+              <a
+                href="https://github.com/Johanvasquezdev/DevopsParcial"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-[#58a6ff] transition-colors"
+              >
+                GitHub →
+              </a>
+              <a
+                href="https://surge.sh"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-[#f0883e] transition-colors"
+              >
+                Surge.sh →
+              </a>
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
 </html>

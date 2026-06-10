@@ -1,0 +1,56 @@
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0d1117; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #8b949e; }
+
+/* ── Pipeline step hover ── */
+.pipe-step {
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  cursor: default;
+}
+.pipe-step:hover {
+  border-color: #3fb950;
+  background-color: #0d1117;
+}
+
+/* ── Stack item hover ── */
+.stack-item {
+  transition: border-color 0.2s ease;
+  cursor: default;
+}
+.stack-item:hover {
+  border-color: #58a6ff;
+}
+
+/* ── Terminal cursor blink ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.cursor {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background: #3fb950;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 1.2s step-end infinite;
+}
+
+/* ── GPU hint for animated elements ── */
+.hero-line,
+.pipe-step,
+.stack-item,
+.terminal-block {
+  will-change: transform, opacity;
+}
